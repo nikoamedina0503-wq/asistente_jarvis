@@ -3,381 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Virtual Jarvis</title>
+    <title>Jarvis - Asistente IA</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Enlace a tu archivo de estilos separado -->
+    <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --jarvis-bg: #131314;
-            --jarvis-surface: #1e1f20;
-            --jarvis-surface-hover: #282a2c;
-            --jarvis-user-bubble: #2b2c2f;
-            --jarvis-text: #e3e3e3;
-            --jarvis-text-secondary: #c4c7c5;
-            --jarvis-border: #333537;
-            /* Degradado personalizado para Jarvis */
-            --jarvis-gradient: linear-gradient(90deg, #3b82f6, #6366f1, #d96570);
-        }
-
-        /* Imagen de Jarvis codificada en Base64 directamente aquí */
-        .brand-logo-img, .ai-avatar-img {
-            background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAARTAESAAMAAAABAAEAAIdpAAQAAAABAAAARgECAAQAAAABAAAAqgECAAwAAAABAAAAuAEPAAIAAAALAAAAwAEQAAMAAAABAAEAAIdpAAQAAAABAAARTAEZAAMAAAABAAAAAAHaAAUAAAABAAAAUAEdAAMAAAABAAIAAIedAAMAAAABAAIAAIedAAMAAAABAAAARgEAAAMAAAABAAAAgAECAAQAAAABAAAAtgECAAcAAAABAAAAtgHDAAIAAAALAAAAwAEaAAUAAAABAAAAyAEaAAUAAAABAAAA0AEaAAUAAAABAAAA2AEaAAUAAAABAAAA4AEaAAUAAAABAAAA6AEaAAUAAAABAAAA8AEaAAUAAAABAAA");
-            background-size: cover;
-            background-position: center;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--jarvis-bg);
-            color: var(--jarvis-text);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 900px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        header {
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: transparent;
-            border-bottom: 1px solid var(--jarvis-border);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: var(--jarvis-text);
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--jarvis-border);
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-        }
-
-        .brand-logo-img {
-            width: 100%;
-            height: 100%;
-        }
-
-        .model-pill {
-            font-size: 0.8rem;
-            color: var(--jarvis-text-secondary);
-            background: var(--jarvis-surface);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--jarvis-border);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .chat-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 24px 120px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            scroll-behavior: smooth;
-        }
-
-        .chat-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-scroll::-webkit-scrollbar-thumb {
-            background: var(--jarvis-border);
-            border-radius: 10px;
-        }
-
-        .message-row {
-            display: flex;
-            gap: 16px;
-            max-width: 85%;
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message-row.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .message-row.ai {
-            align-self: flex-start;
-            max-width: 90%;
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
-            border: 1px solid var(--jarvis-border);
-        }
-
-        .user .avatar {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .ai .avatar {
-            background: var(--jarvis-surface);
-        }
-
-        .ai-avatar-img {
-            width: 100%;
-            height: 100%;
-        }
-
-        .message-content {
-            padding: 4px 0;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            color: var(--jarvis-text);
-        }
-
-        .user .message-content {
-            background: var(--jarvis-user-bubble);
-            padding: 12px 18px;
-            border-radius: 20px;
-            border-bottom-right-radius: 4px;
-        }
-
-        .ai .message-content {
-            background: var(--jarvis-surface);
-            padding: 12px 18px;
-            border-radius: 20px;
-            border-top-left-radius: 4px;
-        }
-
-        .ai .message-content p { margin-bottom: 12px; }
-        .ai .message-content p:last-child { margin-bottom: 0; }
-        .ai .message-content h1, .ai .message-content h2, .ai .message-content h3 {
-            margin: 16px 0 8px 0;
-            color: #fff;
-            font-weight: 600;
-        }
-        .ai .message-content ul, .ai .message-content ol {
-            margin-left: 20px;
-            margin-bottom: 12px;
-        }
-
-        pre {
-            background: #1a1a1c;
-            border: 1px solid var(--jarvis-border);
-            border-radius: 12px;
-            margin: 12px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        code {
-            font-family: 'Fira Code', monospace;
-            font-size: 0.85rem;
-        }
-
-        :not(pre) > code {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: #8ab4f8;
-        }
-
-        pre code {
-            display: block;
-            padding: 16px;
-            overflow-x: auto;
-            color: #e3e3e3;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--jarvis-surface);
-            border: 1px solid var(--jarvis-border);
-            color: var(--jarvis-text-secondary);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: background 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: var(--jarvis-surface-hover);
-            color: white;
-        }
-
-        .input-container {
-            position: absolute;
-            bottom: 24px;
-            left: 24px;
-            right: 24px;
-            background: var(--jarvis-surface);
-            border: 1px solid var(--jarvis-border);
-            border-radius: 32px;
-            padding: 10px 14px 10px 20px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            transition: border-color 0.2s;
-        }
-
-        .input-container:focus-within {
-            border-color: #3b82f6;
-        }
-
-        input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--jarvis-text);
-            font-size: 0.95rem;
-        }
-
-        input::placeholder {
-            color: var(--jarvis-text-secondary);
-        }
-
-        .send-button {
-            background: var(--jarvis-gradient);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .send-button:active {
-            transform: scale(0.92);
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            padding: 6px 0;
-        }
-
-        .dot {
-            width: 7px;
-            height: 7px;
-            background: #3b82f6;
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-    </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <!-- Panel Lateral -->
+    <div class="sidebar">
+        <button class="new-chat-btn" onclick="createNewChat()">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Nuevo Chat
+        </button>
+        <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 600; padding-left: 4px; letter-spacing: 1px;">HISTORIAL</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="main-container">
         <header>
             <div class="brand">
                 <div class="brand-logo">
                     <div class="brand-logo-img"></div>
                 </div>
-                <span>Jarvis</span>
+                <span>Jarvis AI</span>
             </div>
             <div class="model-pill">
-                <i data-lucide="brain-circuit" style="width: 14px; height: 14px; color: #8ab4f8;"></i>
+                <i data-lucide="brain-circuit" style="width: 14px; height: 14px; color: #60a5fa;"></i>
                 <span>gemini-3.8-flash</span>
             </div>
         </header>
 
-        <div class="chat-scroll" id="chatScroll">
-            <div class="message-row ai">
-                <div class="avatar"><div class="ai-avatar-img"></div></div>
-                <div class="message-content">
-                    ¡Hola! 🖐️ ¡Qué alegría saludarte! Soy <strong>Jarvis</strong>, tu asistente virtual para todo lo relacionado con el desarrollo web frontend. 🚀<br><br>Antes de empezar, ¿cómo te llamas para saber cómo dirigirme a ti? 😊
-                </div>
-            </div>
-        </div>
+        <div class="chat-scroll" id="chatScroll"></div>
 
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Escribe tu mensaje o tu nombre..." onkeydown="handleKey(event)" autocomplete="off">
-            <button class="send-button" onclick="sendMsg()">
+            <input type="text" id="userInput" placeholder="Habla con Jarvis..." onkeydown="handleKey(event)" autocomplete="off">
+            <button class="send-button" onclick="sendMsg()" title="Enviar mensaje">
                 <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
     </div>
 
     <script>
-        // Inicializar iconos de Lucide
         lucide.createIcons();
 
-        // Configurar opciones de marked para seguridad y saltos de línea
-        marked.setOptions({
-            breaks: true,
-            sanitize: false // Confiamos en el renderizado de marked
-        });
+        let chats = JSON.parse(localStorage.getItem('jarvis_chats')) || [];
+        let currentChatId = localStorage.getItem('jarvis_current_id') || null;
+
+        function initApp() {
+            if (chats.length === 0) {
+                createNewChat();
+            } else {
+                if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
+                    currentChatId = chats[0].id;
+                }
+                loadChat(currentChatId);
+            }
+            renderHistory();
+        }
+
+        function createNewChat() {
+            const newChat = {
+                id: 'chat_' + Date.now(),
+                title: 'Nueva conversación',
+                messages: [
+                    {
+                        sender: 'ai',
+                        text: '¡Hola! 🖐️ Sistema Jarvis activado. Soy tu asistente virtual especializado en desarrollo web frontend. 🚀<br><br>Antes de comenzar, dime: ¿cómo te llamas?'
+                    }
+                ]
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveAndRefresh();
+            speakText("Sistema Jarvis activado. ¿Cómo te llamas?");
+        }
+
+        function loadChat(id) {
+            currentChatId = id;
+            localStorage.setItem('jarvis_current_id', currentChatId);
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+
+            const container = document.getElementById('chatScroll');
+            container.innerHTML = '';
+            
+            chat.messages.forEach(msg => {
+                appendDOMMessage(msg.sender, msg.text, false);
+            });
+            renderHistory();
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('jarvis_chats', JSON.stringify(chats));
+            localStorage.setItem('jarvis_current_id', currentChatId);
+            loadChat(currentChatId);
+        }
 
         async function sendMsg() {
             const input = document.getElementById('userInput');
             const txt = input.value.trim();
             if (!txt) return;
 
-            // Limpiar input inmediatamente
             input.value = '';
-            
-            // Añadir mensaje del usuario
-            appendMsg('user', txt);
+            addMessageToCurrentChat('user', txt);
+            appendDOMMessage('user', txt, true);
 
-            // Mostrar indicador de carga
             const loadId = showLoading();
 
             try {
@@ -387,43 +120,74 @@
                     body: JSON.stringify({ mensaje: txt })
                 });
                 const data = await res.json();
-                
-                // Quitar indicador de carga
                 removeLoading(loadId);
 
                 if (res.ok) {
-                    appendMsg('ai', data.respuesta);
+                    addMessageToCurrentChat('ai', data.respuesta);
+                    appendDOMMessage('ai', data.respuesta, true);
+                    speakText(data.respuesta);
+
+                    const activeChat = chats.find(c => c.id === currentChatId);
+                    if (activeChat && activeChat.title === 'Nueva conversación') {
+                        activeChat.title = txt.length > 25 ? txt.substring(0, 25) + '...' : txt;
+                        saveAndRefresh();
+                    }
                 } else {
-                    appendMsg('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`);
+                    appendDOMMessage('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`, false);
                 }
             } catch (e) {
                 removeLoading(loadId);
-                appendMsg('ai', '⚠️ **Error de red con el servidor.**');
+                appendDOMMessage('ai', '⚠️ **Error de red con el servidor.**', false);
             }
         }
 
-        // Manejar tecla Enter
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/```[\s\S]*?```/g, 'Bloque de código omitido.');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0;
+                utterance.pitch = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function addMessageToCurrentChat(sender, text) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.messages.push({ sender, text });
+                localStorage.setItem('jarvis_chats', JSON.stringify(chats));
+            }
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            chats.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                item.innerText = chat.title;
+                item.onclick = () => loadChat(chat.id);
+                list.appendChild(item);
+            });
+        }
+
         function handleKey(e) {
             if (e.key === 'Enter') {
                 sendMsg();
             }
         }
 
-        // Función para añadir mensajes al chat
-        function appendMsg(sender, text) {
+        function appendDOMMessage(sender, text, save=true) {
             const container = document.getElementById('chatScroll');
             const row = document.createElement('div');
             row.className = `message-row ${sender}`;
 
-            // HTML para el avatar
-            let avatarHTML = '';
-            if (sender === 'user') {
-                avatarHTML = `<div class="avatar"><i data-lucide="user" style="width: 18px; height: 18px;"></i></div>`;
-            } else {
-                avatarHTML = `<div class="avatar"><div class="ai-avatar-img"></div></div>`;
-            }
+            let avatarHTML = sender === 'user' 
+                ? `<div class="avatar"><i data-lucide="user" style="width: 18px; height: 18px;"></i></div>` 
+                : `<div class="avatar"><div class="ai-avatar-img"></div></div>`;
 
-            // HTML para el contenido, parseando Markdown para la IA
             const contentHTML = sender === 'ai' ? marked.parse(text) : escapeHtml(text);
 
             row.innerHTML = `
@@ -433,17 +197,14 @@
 
             container.appendChild(row);
 
-            // Añadir botones de copia a los bloques de código de la IA
             if (sender === 'ai') {
                 attachCopyButtons(row);
             }
 
-            // Re-renderizar iconos nuevos y hacer scroll al final
             lucide.createIcons();
             container.scrollTop = container.scrollHeight;
         }
 
-        // Mostrar puntos de carga de la IA
         function showLoading() {
             const container = document.getElementById('chatScroll');
             const id = 'load-' + Date.now();
@@ -466,18 +227,15 @@
             return id;
         }
 
-        // Quitar puntos de carga
         function removeLoading(id) {
             const el = document.getElementById(id);
             if (el) el.remove();
         }
 
-        // Escapar HTML para mensajes de usuario (seguridad)
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Función para añadir botones de "Copiar" a los bloques <pre>
         function attachCopyButtons(scope) {
             scope.querySelectorAll('pre').forEach(pre => {
                 const btn = document.createElement('button');
@@ -496,6 +254,8 @@
                 pre.appendChild(btn);
             });
         }
+
+        window.onload = initApp;
     </script>
 </body>
 </html>

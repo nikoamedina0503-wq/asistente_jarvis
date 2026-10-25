@@ -7,21 +7,22 @@ from google import genai
 
 app = Flask(__name__)
 
-# Leemos la clave de entorno de forma segura al iniciar la aplicación
 api_key = os.environ.get("asistente_jarvis")
-
-# Línea de diagnóstico para ver si la clave está llegando correctamente a los logs de Render
 print(f"DEBUG - API KEY leída: {api_key[:5] if api_key else 'NO EXISTE'}")
 
 if not api_key:
     raise ValueError("No se encontró la variable de entorno 'asistente_jarvis' en el servidor.")
 
-# Inicializamos el cliente correctamente fuera de las rutas
 client = genai.Client(api_key=api_key)
 
 @app.route("/")
 def home():
     return send_file("index.html")
+
+# Ruta para servir el archivo CSS separado
+@app.route("/style.css")
+def serve_css():
+    return send_file("style.css")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -32,7 +33,6 @@ def chat():
         if not mensaje_usuario:
             return jsonify({"error": "No enviaste ningún mensaje"}), 400
 
-        # Personalidad de Jarvis actualizada
         instrucciones_asistente = (
             "Eres Jarvis, un asistente virtual de desarrollo web frontend muy amigable, entusiasta, "
             "cercano y servicial. "
@@ -43,7 +43,6 @@ def chat():
             "acompañado de explicaciones claras y sencillas, hablando de 'tú' de forma muy cordial."
         )
 
-        # Llamada al modelo con las instrucciones y el mensaje del usuario
         response = client.models.generate_content(
             model="gemini-3.8-flash",
             contents=f"{instrucciones_asistente}\n\nPregunta del usuario: {mensaje_usuario}",
