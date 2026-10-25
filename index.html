@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis - Asistente IA</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/style.css?v=1">
+    <link rel="preload" as="image" href="/static/jarvis_icono.jpg?v=1">
+    <link rel="preload" as="image" href="/static/jarvis_voz.gif?v=1">
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.439.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
     <div class="sidebar">
-        <button class="new-chat-btn" onclick="createNewChat()">
+        <button class="new-chat-btn" onclick="createNewChat(true)">
             <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Nuevo Chat
         </button>
         <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 600; padding-left: 4px; letter-spacing: 1px;">HISTORIAL</div>
@@ -37,7 +40,7 @@
 
         <div class="input-container">
             <input type="text" id="userInput" placeholder="Habla con Jarvis..." onkeydown="handleKey(event)" autocomplete="off">
-            <button class="send-button" onclick="sendMsg()" title="Enviar">
+            <button class="send-button" id="sendBtn" onclick="sendMsg()" title="Enviar">
                 <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
@@ -46,77 +49,100 @@
     <script>
         lucide.createIcons();
 
-        let chats = JSON.parse(localStorage.getItem('jarvis_chats')) || [];
+        let chats = [];
+        try { chats = JSON.parse(localStorage.getItem('jarvis_chats')) || []; } catch (e) { chats = []; }
         let currentChatId = localStorage.getItem('jarvis_current_id') || null;
+        let busy = false;
+
+        const GREETING = '¡Hola! 🖐️ Sistema Jarvis activado. Soy tu asistente virtual especializado en desarrollo web frontend. 🚀\n\nAntes de comenzar, dime: ¿cómo te llamas?';
+
+        function persist() {
+            try {
+                localStorage.setItem('jarvis_chats', JSON.stringify(chats));
+                localStorage.setItem('jarvis_current_id', currentChatId);
+            } catch (e) { console.warn('No se pudo guardar en localStorage', e); }
+        }
 
         function initApp() {
             if (chats.length === 0) {
-                createNewChat();
+                createNewChat(false); // sin voz: el navegador la bloquea antes del primer clic
             } else {
                 if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
                     currentChatId = chats[0].id;
                 }
                 loadChat(currentChatId);
             }
-            renderHistory();
         }
 
-        function createNewChat() {
+        function createNewChat(speak) {
             const newChat = {
                 id: 'chat_' + Date.now(),
                 title: 'Nueva conversación',
-                messages: [
-                    {
-                        sender: 'ai',
-                        text: '¡Hola! 🖐️ Sistema Jarvis activado. Soy tu asistente virtual especializado en desarrollo web frontend. 🚀<br><br>Antes de comenzar, dime: ¿cómo te llamas?'
-                    }
-                ]
+                messages: [{ sender: 'ai', text: GREETING }]
             };
             chats.unshift(newChat);
             currentChatId = newChat.id;
-            saveAndRefresh();
-            speakText("Sistema Jarvis activado. ¿Cómo te llamas?");
+            persist();
+            loadChat(currentChatId);
+            if (speak === true) speakText('Sistema Jarvis activado. ¿Cómo te llamas?');
         }
 
         function loadChat(id) {
             currentChatId = id;
-            localStorage.setItem('jarvis_current_id', currentChatId);
+            persist();
             const chat = chats.find(c => c.id === id);
             if (!chat) return;
 
             const container = document.getElementById('chatScroll');
             container.innerHTML = '';
-            
-            chat.messages.forEach(msg => {
-                appendDOMMessage(msg.sender, msg.text);
-            });
+            chat.messages.forEach(msg => appendDOMMessage(msg.sender, msg.text));
             renderHistory();
         }
 
-        function saveAndRefresh() {
-            localStorage.setItem('jarvis_chats', JSON.stringify(chats));
-            localStorage.setItem('jarvis_current_id', currentChatId);
-            loadChat(currentChatId);
+        function setBusy(state) {
+            busy = state;
+            document.getElementById('userInput').disabled = state;
+            document.getElementById('sendBtn').disabled = state;
+            if (!state) document.getElementById('userInput').focus();
         }
 
         async function sendMsg() {
+            if (busy) return;
             const input = document.getElementById('userInput');
             const txt = input.value.trim();
             if (!txt) return;
+
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            // Historial previo (antes de añadir el mensaje nuevo)
+            const historial = chat.messages.map(m => ({
+                sender: m.sender,
+                text: String(m.text).replace(/<[^>]*>/g, ' ')
+            }));
+
+            window.speechSynthesis && window.speechSynthesis.cancel();
+            document.body.classList.remove('speaking');
 
             input.value = '';
             addMessageToCurrentChat('user', txt);
             appendDOMMessage('user', txt);
 
+            setBusy(true);
             const loadId = showLoading();
+            const slowTimer = setTimeout(() => {
+                const el = document.querySelector('#' + loadId + ' .message-content');
+                if (el) el.textContent = 'Reconectando con el servidor…';
+            }, 6000);
 
             try {
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensaje: txt })
+                    body: JSON.stringify({ mensaje: txt, historial })
                 });
                 const data = await res.json();
+                clearTimeout(slowTimer);
                 removeLoading(loadId);
 
                 if (res.ok) {
@@ -124,52 +150,48 @@
                     appendDOMMessage('ai', data.respuesta);
                     speakText(data.respuesta);
 
-                    const activeChat = chats.find(c => c.id === currentChatId);
-                    if (activeChat && activeChat.title === 'Nueva conversación') {
-                        activeChat.title = txt.length > 25 ? txt.substring(0, 25) + '...' : txt;
-                        saveAndRefresh();
+                    if (chat.title === 'Nueva conversación') {
+                        chat.title = txt.length > 25 ? txt.substring(0, 25) + '...' : txt;
+                        persist();
+                        renderHistory();
                     }
                 } else {
-                    appendDOMMessage('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`);
+                    appendDOMMessage('ai', '⚠️ **Error:** ' + (data.error || 'Fallo en el servidor'));
                 }
             } catch (e) {
+                clearTimeout(slowTimer);
                 removeLoading(loadId);
                 appendDOMMessage('ai', '⚠️ **Error de red con el servidor.**');
+            } finally {
+                setBusy(false);
             }
         }
 
         function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const cleanText = text.replace(/<[^>]*>?/gm, '');
-                const utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.0;
-                utterance.pitch = 0.9;
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
 
-                const logos = document.querySelectorAll('.brand-logo-img, .ai-avatar-img');
+            const cleanText = String(text)
+                .replace(/```[\s\S]*?```/g, ' bloque de código. ')
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/[*#_`>~]/g, '');
 
-                utterance.onstart = () => {
-                    logos.forEach(logo => logo.classList.add('speaking-vor'));
-                };
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 0.9;
 
-                utterance.onend = () => {
-                    logos.forEach(logo => logo.classList.remove('speaking-vor'));
-                };
+            utterance.onstart = () => document.body.classList.add('speaking');
+            utterance.onend = utterance.onerror = () => document.body.classList.remove('speaking');
 
-                utterance.onerror = () => {
-                    logos.forEach(logo => logo.classList.remove('speaking-vor'));
-                };
-
-                window.speechSynthesis.speak(utterance);
-            }
+            window.speechSynthesis.speak(utterance);
         }
 
         function addMessageToCurrentChat(sender, text) {
             const chat = chats.find(c => c.id === currentChatId);
             if (chat) {
                 chat.messages.push({ sender, text });
-                localStorage.setItem('jarvis_chats', JSON.stringify(chats));
+                persist();
             }
         }
 
@@ -178,34 +200,31 @@
             list.innerHTML = '';
             chats.forEach(chat => {
                 const item = document.createElement('div');
-                item.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
-                item.innerText = chat.title;
+                item.className = 'history-item' + (chat.id === currentChatId ? ' active' : '');
+                item.textContent = chat.title;
                 item.onclick = () => loadChat(chat.id);
                 list.appendChild(item);
             });
         }
 
         function handleKey(e) {
-            if (e.key === 'Enter') {
-                sendMsg();
-            }
+            if (e.key === 'Enter') sendMsg();
         }
 
         function appendDOMMessage(sender, text) {
             const container = document.getElementById('chatScroll');
             const row = document.createElement('div');
-            row.className = `message-row ${sender}`;
+            row.className = 'message-row ' + sender;
 
-            let avatarHTML = sender === 'user' 
-                ? `<div class="avatar"><i data-lucide="user" style="width: 18px; height: 18px;"></i></div>` 
-                : `<div class="avatar"><div class="ai-avatar-img"></div></div>`;
+            const avatarHTML = sender === 'user'
+                ? '<div class="avatar"><i data-lucide="user" style="width: 18px; height: 18px;"></i></div>'
+                : '<div class="avatar"><div class="ai-avatar-img"></div></div>';
 
-            const contentHTML = sender === 'ai' ? marked.parse(text) : escapeHtml(text);
+            const contentHTML = sender === 'ai'
+                ? DOMPurify.sanitize(marked.parse(String(text)))
+                : escapeHtml(String(text));
 
-            row.innerHTML = `
-                ${avatarHTML}
-                <div class="message-content">${contentHTML}</div>
-            `;
+            row.innerHTML = avatarHTML + '<div class="message-content">' + contentHTML + '</div>';
 
             container.appendChild(row);
             lucide.createIcons();
@@ -218,10 +237,9 @@
             const row = document.createElement('div');
             row.className = 'message-row ai';
             row.id = id;
-            row.innerHTML = `
-                <div class="avatar"><div class="ai-avatar-img"></div></div>
-                <div class="message-content">...</div>
-            `;
+            row.innerHTML =
+                '<div class="avatar"><div class="ai-avatar-img"></div></div>' +
+                '<div class="message-content">...</div>';
             container.appendChild(row);
             container.scrollTop = container.scrollHeight;
             return id;
@@ -233,7 +251,7 @@
         }
 
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
         window.onload = initApp;
