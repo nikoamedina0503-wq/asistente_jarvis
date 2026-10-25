@@ -1,4 +1,4 @@
-:root {
+::root {
     --jarvis-bg: #090d16;
     --jarvis-surface: #101726;
     --jarvis-surface-hover: #182238;
@@ -6,15 +6,43 @@
     --jarvis-text: #e2e8f0;
     --jarvis-text-secondary: #94a3b8;
     --jarvis-border: #1e3a8a;
-    --jarvis-blue-glow: 0 0 20px rgba(59, 130, 246, 0.6);
+    --jarvis-blue-glow: 0 0 20px rgba(59, 130, 246, 0.7);
     --jarvis-gradient: linear-gradient(135deg, #1d4ed8, #3b82f6, #60a5fa);
 }
 
-/* Foto de Jarvis para el logo y el avatar */
+/* 1. FOTO POR DEFECTO: Paul Bettany / JARVIS */
 .brand-logo-img, .ai-avatar-img {
     background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAARTAESAAMAAAABAAEAAIdpAAQAAAABAAAARgECAAQAAAABAAAAqgECAAwAAAABAAAAuAEPAAIAAAALAAAAwAEQAAMAAAABAAEAAIdpAAQAAAABAAARTAEZAAMAAAABAAAAAAHaAAUAAAABAAAAUAEdAAMAAAABAAIAAIedAAMAAAABAAIAAIedAAMAAAABAAAARgEAAAMAAAABAAAAgAECAAQAAAABAAAAtgECAAcAAAABAAAAtgHDAAIAAAALAAAAwAEaAAUAAAABAAAAyAEaAAUAAAABAAAA0AEaAAUAAAABAAAA2AEaAAUAAAABAAAA4AEaAAUAAAABAAAA6AEaAAUAAAABAAAA8AEaAAUAAAABAAA");
     background-size: cover;
     background-position: center;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+/* 2. IMAGEN / ANIMACIÓN VOR (Se activa al hablar) */
+.speaking-vor {
+    background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAARTAESAAMAAAABAAEAAIdpAAQAAAABAAAARgECAAQAAAABAAAAqgECAAwAAAABAAAAuAEPAAIAAAALAAAAwAEQAAMAAAABAAEAAIdpAAQAAAABAAARTAEZAAMAAAABAAAAAAHaAAUAAAABAAAAUAEdAAMAAAABAAIAAIedAAMAAAABAAIAAIedAAMAAAABAAAARgEAAAMAAAABAAAAgAECAAQAAAABAAAAtgECAAcAAAABAAAAtgHDAAIAAAALAAAAwAEaAAUAAAABAAAAyAEaAAUAAAABAAAA0AEaAAUAAAABAAAA2AEaAAUAAAABAAAA4AEaAAUAAAABAAAA6AEaAAUAAAABAAAA8AEaAAUAAAABAAA") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    animation: vorPulse 1.2s infinite ease-in-out;
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.9);
+}
+
+/* Efecto de rotación y pulso para la esfera VOR */
+@keyframes vorPulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+    }
+    50% {
+        transform: scale(1.1) rotate(180deg);
+        box-shadow: 0 0 30px rgba(0, 235, 255, 1);
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+    }
 }
 
 * {
@@ -32,7 +60,6 @@ body {
     overflow: hidden;
 }
 
-/* Panel Lateral de Historial */
 .sidebar {
     width: 260px;
     background: var(--jarvis-surface);
@@ -43,7 +70,6 @@ body {
     gap: 16px;
 }
 
-/* Transición suave para animación y luces en botones */
 .new-chat-btn, .history-item, .send-button, .copy-btn {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -62,7 +88,6 @@ body {
     font-weight: 500;
 }
 
-/* Efecto de elevación y luz neón azul al pasar el cursor */
 .new-chat-btn:hover {
     background: #1d4ed8;
     box-shadow: var(--jarvis-blue-glow);
@@ -103,7 +128,6 @@ body {
     border-color: #3b82f6;
 }
 
-/* Contenedor Principal */
 .main-container {
     flex: 1;
     height: 100vh;
@@ -131,8 +155,8 @@ header {
 }
 
 .brand-logo {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -140,11 +164,6 @@ header {
     justify-content: center;
     border: 2px solid #3b82f6;
     box-shadow: var(--jarvis-blue-glow);
-}
-
-.brand-logo-img {
-    width: 100%;
-    height: 100%;
 }
 
 .model-pill {
@@ -222,11 +241,6 @@ header {
     background: var(--jarvis-surface);
 }
 
-.ai-avatar-img {
-    width: 100%;
-    height: 100%;
-}
-
 .message-content {
     padding: 12px 18px;
     line-height: 1.6;
@@ -302,7 +316,6 @@ pre code {
     transform: translateY(-1px);
 }
 
-/* Input con resplandor neón */
 .input-container {
     position: absolute;
     bottom: 24px;

@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis - Asistente IA</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Enlace a tu archivo de estilos separado -->
+    <!-- Enlace al archivo de estilos separado -->
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
-    <!-- Panel Lateral -->
+    <!-- Panel Lateral de Historial -->
     <div class="sidebar">
         <button class="new-chat-btn" onclick="createNewChat()">
             <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Nuevo Chat
@@ -141,6 +141,7 @@
             }
         }
 
+        // Función de Síntesis de Voz con activación de la animación VOR
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -149,6 +150,22 @@
                 utterance.lang = 'es-ES';
                 utterance.rate = 1.0;
                 utterance.pitch = 0.9;
+
+                // Seleccionar los avatares y logos para cambiar a la esfera VOR
+                const logos = document.querySelectorAll('.brand-logo-img, .ai-avatar-img');
+
+                utterance.onstart = () => {
+                    logos.forEach(logo => logo.classList.add('speaking-vor'));
+                };
+
+                utterance.onend = () => {
+                    logos.forEach(logo => logo.classList.remove('speaking-vor'));
+                };
+
+                utterance.onerror = () => {
+                    logos.forEach(logo => logo.classList.remove('speaking-vor'));
+                };
+
                 window.speechSynthesis.speak(utterance);
             }
         }
