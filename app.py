@@ -7,6 +7,9 @@ app = Flask(__name__)
 # Leemos la clave de entorno de forma segura al iniciar la aplicación
 api_key = os.environ.get("asistente_jarvis")
 
+# Línea de diagnóstico para ver si la clave está llegando correctamente a los logs de Render
+print(f"DEBUG - API KEY leída: {api_key[:5] if api_key else 'NO EXISTE'}")
+
 if not api_key:
     raise ValueError("No se encontró la variable de entorno 'asistente_jarvis' en el servidor.")
 
