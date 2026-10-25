@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis - Asistente IA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Enlace al archivo de estilos separado -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
-    <!-- Panel Lateral de Historial -->
     <div class="sidebar">
         <button class="new-chat-btn" onclick="createNewChat()">
             <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Nuevo Chat
@@ -21,7 +19,6 @@
         <div class="history-list" id="historyList"></div>
     </div>
 
-    <!-- Contenedor Principal -->
     <div class="main-container">
         <header>
             <div class="brand">
@@ -32,7 +29,7 @@
             </div>
             <div class="model-pill">
                 <i data-lucide="brain-circuit" style="width: 14px; height: 14px; color: #60a5fa;"></i>
-                <span>gemini-3.8-flash</span>
+                <span>gemini-2.5-flash</span>
             </div>
         </header>
 
@@ -40,7 +37,7 @@
 
         <div class="input-container">
             <input type="text" id="userInput" placeholder="Habla con Jarvis..." onkeydown="handleKey(event)" autocomplete="off">
-            <button class="send-button" onclick="sendMsg()" title="Enviar mensaje">
+            <button class="send-button" onclick="sendMsg()" title="Enviar">
                 <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
@@ -91,7 +88,7 @@
             container.innerHTML = '';
             
             chat.messages.forEach(msg => {
-                appendDOMMessage(msg.sender, msg.text, false);
+                appendDOMMessage(msg.sender, msg.text);
             });
             renderHistory();
         }
@@ -109,7 +106,7 @@
 
             input.value = '';
             addMessageToCurrentChat('user', txt);
-            appendDOMMessage('user', txt, true);
+            appendDOMMessage('user', txt);
 
             const loadId = showLoading();
 
@@ -124,7 +121,7 @@
 
                 if (res.ok) {
                     addMessageToCurrentChat('ai', data.respuesta);
-                    appendDOMMessage('ai', data.respuesta, true);
+                    appendDOMMessage('ai', data.respuesta);
                     speakText(data.respuesta);
 
                     const activeChat = chats.find(c => c.id === currentChatId);
@@ -133,25 +130,23 @@
                         saveAndRefresh();
                     }
                 } else {
-                    appendDOMMessage('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`, false);
+                    appendDOMMessage('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`);
                 }
             } catch (e) {
                 removeLoading(loadId);
-                appendDOMMessage('ai', '⚠️ **Error de red con el servidor.**', false);
+                appendDOMMessage('ai', '⚠️ **Error de red con el servidor.**');
             }
         }
 
-        // Función de Síntesis de Voz con activación de la animación VOR
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/```[\s\S]*?```/g, 'Bloque de código omitido.');
+                const cleanText = text.replace(/<[^>]*>?/gm, '');
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'es-ES';
                 utterance.rate = 1.0;
                 utterance.pitch = 0.9;
 
-                // Seleccionar los avatares y logos para cambiar a la esfera VOR
                 const logos = document.querySelectorAll('.brand-logo-img, .ai-avatar-img');
 
                 utterance.onstart = () => {
@@ -196,7 +191,7 @@
             }
         }
 
-        function appendDOMMessage(sender, text, save=true) {
+        function appendDOMMessage(sender, text) {
             const container = document.getElementById('chatScroll');
             const row = document.createElement('div');
             row.className = `message-row ${sender}`;
@@ -213,11 +208,6 @@
             `;
 
             container.appendChild(row);
-
-            if (sender === 'ai') {
-                attachCopyButtons(row);
-            }
-
             lucide.createIcons();
             container.scrollTop = container.scrollHeight;
         }
@@ -230,16 +220,9 @@
             row.id = id;
             row.innerHTML = `
                 <div class="avatar"><div class="ai-avatar-img"></div></div>
-                <div class="message-content">
-                    <div class="typing-dots">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>
-                </div>
+                <div class="message-content">...</div>
             `;
             container.appendChild(row);
-            lucide.createIcons();
             container.scrollTop = container.scrollHeight;
             return id;
         }
@@ -251,25 +234,6 @@
 
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        function attachCopyButtons(scope) {
-            scope.querySelectorAll('pre').forEach(pre => {
-                const btn = document.createElement('button');
-                btn.className = 'copy-btn';
-                btn.innerHTML = `<i data-lucide="copy" style="width:12px;height:12px;"></i> Copiar`;
-                btn.onclick = () => {
-                    const codeText = pre.querySelector('code').innerText;
-                    navigator.clipboard.writeText(codeText).then(() => {
-                        btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> ¡Copiado!`;
-                        setTimeout(() => {
-                            btn.innerHTML = `<i data-lucide="copy" style="width:12px;height:12px;"></i> Copiar`;
-                            lucide.createIcons();
-                        }, 2000);
-                    });
-                };
-                pre.appendChild(btn);
-            });
         }
 
         window.onload = initApp;
