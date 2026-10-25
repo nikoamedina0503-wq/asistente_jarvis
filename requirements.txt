@@ -1,0 +1,6 @@
+flask
+flask-limiter
+google-genai>=2.25.0
+python-dotenv
+gunicorn
+requests
