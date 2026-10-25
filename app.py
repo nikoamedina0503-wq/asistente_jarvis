@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from flask import Flask, request, jsonify, send_file
 from google import genai
@@ -40,9 +43,10 @@ def chat():
 
         # Llamada al modelo con las instrucciones y el mensaje del usuario
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=f"{instrucciones_asistente}\n\nPregunta del usuario: {mensaje_usuario}",
         )
+        
         
         return jsonify({"respuesta": response.text})
 
