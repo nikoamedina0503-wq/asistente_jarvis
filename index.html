@@ -323,7 +323,6 @@
         </div>
 
         <div class="input-container">
-            <!-- AQUÍ ESTÁ LA FUNCIÓN DE SCRIPT VINCULADA CORRECTAMENTE -->
             <input type="text" id="userInput" placeholder="Escribe un mensaje a Gemini..." onkeydown="handleKey(event)">
             <button class="send-button" onclick="sendMsg()">
                 <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
@@ -339,7 +338,6 @@
             const txt = input.value.trim();
             if (!txt) return;
 
-            // Limpiamos el input de inmediato para que no se quede trabado
             input.value = '';
             
             appendMsg('user', txt);
@@ -366,7 +364,6 @@
             }
         }
 
-        // FUNCIÓN DE TECLADO QUE FALTABA
         function handleKey(e) {
             if (e.key === 'Enter') {
                 sendMsg();

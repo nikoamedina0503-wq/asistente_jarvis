@@ -47,7 +47,6 @@ def chat():
             contents=f"{instrucciones_asistente}\n\nPregunta del usuario: {mensaje_usuario}",
         )
         
-        
         return jsonify({"respuesta": response.text})
 
     except Exception as e:
