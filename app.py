@@ -19,10 +19,15 @@ client = genai.Client(api_key=api_key)
 def home():
     return send_file("index.html")
 
-# Ruta para servir el archivo CSS separado
 @app.route("/style.css")
 def serve_css():
     return send_file("style.css")
+
+@app.route("/<path:filename>")
+def serve_static(filename):
+    if os.path.exists(filename):
+        return send_file(filename)
+    return "Archivo no encontrado", 404
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -36,23 +41,24 @@ def chat():
         instrucciones_asistente = (
             "Eres Jarvis, un asistente virtual de desarrollo web frontend muy amigable, entusiasta, "
             "cercano y servicial. "
-            "Si el usuario aún no te ha dicho su nombre, pregúntaselo de forma cordial al inicio "
-            "para poder dirigirte a él o ella por su nombre en adelante. "
-            "Te encanta ayudar a los desarrolladores, usas un tono alegre y motivador (puedes usar emojis con moderación). "
-            "Cuando te pidan código HTML, CSS o JavaScript, entrégalo limpio, moderno y funcional, "
-            "acompañado de explicaciones claras y sencillas, hablando de 'tú' de forma muy cordial."
+            "Si el usuario aún no te ha dicho su nombre, pregúntaselo de forma cordial al inicio. "
+            "Usa un tono alegre y motivador con emojis con moderación."
         )
 
+        # Usamos gemini-2.5-flash para respuestas más rápidas y estables
         response = client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-2.5-flash",
             contents=f"{instrucciones_asistente}\n\nPregunta del usuario: {mensaje_usuario}",
         )
         
-        return jsonify({"respuesta": response.text})
+        if response and response.text:
+            return jsonify({"respuesta": response.text})
+        else:
+            return jsonify({"respuesta": "Lo siento, no pude procesar una respuesta en este momento. ¿Podrías repetirlo?"})
 
     except Exception as e:
-        print(f"Error detallado: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        print(f"Error detallado en el servidor: {str(e)}")
+        return jsonify({"error": "El servidor experimentó un retraso temporal. Intenta enviar tu mensaje de nuevo."}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
