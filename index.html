@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Gemini Studio</title>
+    <title>Asistente Jarvis</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -63,14 +63,20 @@
         }
 
         .brand-logo {
-            width: 28px;
-            height: 28px;
-            background: var(--gemini-gradient);
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            border: 1px solid var(--gemini-border);
+        }
+
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .model-pill {
@@ -134,6 +140,7 @@
             justify-content: center;
             flex-shrink: 0;
             font-size: 0.85rem;
+            overflow: hidden;
         }
 
         .user .avatar {
@@ -145,6 +152,12 @@
             background: var(--gemini-surface);
             color: #8ab4f8;
             border: 1px solid var(--gemini-border);
+        }
+
+        .ai .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .message-content {
@@ -303,148 +316,4 @@
         <header>
             <div class="brand">
                 <div class="brand-logo">
-                    <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
-                </div>
-                <span>Gemini Studio</span>
-            </div>
-            <div class="model-pill">
-                <i data-lucide="bot" style="width: 14px; height: 14px; color: #8ab4f8;"></i>
-                <span>gemini-3.8-flash</span>
-            </div>
-        </header>
-
-        <div class="chat-scroll" id="chatScroll">
-            <div class="message-row ai">
-                <div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>
-                <div class="message-content">
-                    ¡Hola! Soy tu asistente inteligente. ¿Qué código o proyecto vamos a desarrollar hoy?
-                </div>
-            </div>
-        </div>
-
-        <div class="input-container">
-            <input type="text" id="userInput" placeholder="Escribe un mensaje a Gemini..." onkeydown="handleKey(event)">
-            <button class="send-button" onclick="sendMsg()">
-                <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
-            </button>
-        </div>
-    </div>
-
-    <script>
-        lucide.createIcons();
-
-        async function sendMsg() {
-            const input = document.getElementById('userInput');
-            const txt = input.value.trim();
-            if (!txt) return;
-
-            input.value = '';
-            
-            appendMsg('user', txt);
-
-            const loadId = showLoading();
-
-            try {
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensaje: txt })
-                });
-                const data = await res.json();
-                removeLoading(loadId);
-
-                if (res.ok) {
-                    appendMsg('ai', data.respuesta);
-                } else {
-                    appendMsg('ai', `⚠️ **Error:** ${data.error || 'Fallo en el servidor'}`);
-                }
-            } catch (e) {
-                removeLoading(loadId);
-                appendMsg('ai', '⚠️ **Error de red con Flask.**');
-            }
-        }
-
-        function handleKey(e) {
-            if (e.key === 'Enter') {
-                sendMsg();
-            }
-        }
-
-        function appendMsg(sender, text) {
-            const container = document.getElementById('chatScroll');
-            const row = document.createElement('div');
-            row.className = `message-row ${sender}`;
-
-            const avatarHTML = sender === 'user' 
-                ? `<div class="avatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>` 
-                : `<div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>`;
-
-            const contentHTML = sender === 'ai' ? marked.parse(text) : escapeHtml(text);
-
-            row.innerHTML = `
-                ${avatarHTML}
-                <div class="message-content">${contentHTML}</div>
-            `;
-
-            container.appendChild(row);
-
-            if (sender === 'ai') {
-                attachCopyButtons(row);
-            }
-
-            lucide.createIcons();
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function showLoading() {
-            const container = document.getElementById('chatScroll');
-            const id = 'load-' + Date.now();
-            const row = document.createElement('div');
-            row.className = 'message-row ai';
-            row.id = id;
-            row.innerHTML = `
-                <div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>
-                <div class="message-content">
-                    <div class="typing-dots">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(row);
-            lucide.createIcons();
-            container.scrollTop = container.scrollHeight;
-            return id;
-        }
-
-        function removeLoading(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        function attachCopyButtons(scope) {
-            scope.querySelectorAll('pre').forEach(pre => {
-                const btn = document.createElement('button');
-                btn.className = 'copy-btn';
-                btn.innerHTML = `<i data-lucide="copy" style="width:12px;height:12px;"></i> Copiar`;
-                btn.onclick = () => {
-                    const codeText = pre.querySelector('code').innerText;
-                    navigator.clipboard.writeText(codeText).then(() => {
-                        btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> ¡Copiado!`;
-                        setTimeout(() => {
-                            btn.innerHTML = `<i data-lucide="copy" style="width:12px;height:12px;"></i> Copiar`;
-                            lucide.createIcons();
-                        }, 2000);
-                    });
-                };
-                pre.appendChild(btn);
-            });
-        }
-    </script>
-</body>
-</html>
+                    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAARTAESAAMAAAABAAEAAIdpAAQAAAABAAAARgECAAQAAAABAAAAqgECAAwAAAABAAAAuAEPAAIAAAALAAAAwAEQAAMAAAABAAEAAIdpAAQAAAABAAARTAEZAAMAAAABAAAAAAHaAAUAAAABAAAAUAEdAAMAAAABAAIAAIedAAMAAAABAAIAAIedAAMAAAABAAAARgEAAAMAAAABAAAAgAECAAQAAAABAAAAtgECAAcAAAABAAAAtgHDAAIAAAALAAAAwAEaAAUAAAABAAAAyAEaAAUAAAABAAAA0AEaAAUAAAABAAAA2AEaAAUAAAABAAAA4AEaAAUAAAABAAAA6AEaAAUAAAABAAAA8AEaAAUAAAABAAA
