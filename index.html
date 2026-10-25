@@ -3,20 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Jarvis</title>
+    <title>Asistente Virtual Jarvis</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --gemini-bg: #131314;
-            --gemini-surface: #1e1f20;
-            --gemini-surface-hover: #282a2c;
-            --gemini-user-bubble: #2b2c2f;
-            --gemini-text: #e3e3e3;
-            --gemini-text-secondary: #c4c7c5;
-            --gemini-border: #333537;
-            --gemini-gradient: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            --jarvis-bg: #131314;
+            --jarvis-surface: #1e1f20;
+            --jarvis-surface-hover: #282a2c;
+            --jarvis-user-bubble: #2b2c2f;
+            --jarvis-text: #e3e3e3;
+            --jarvis-text-secondary: #c4c7c5;
+            --jarvis-border: #333537;
+            /* Degradado personalizado para Jarvis */
+            --jarvis-gradient: linear-gradient(90deg, #3b82f6, #6366f1, #d96570);
+        }
+
+        /* Imagen de Jarvis codificada en Base64 directamente aquí */
+        .brand-logo-img, .ai-avatar-img {
+            background-image: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QBaRXhpZgAATU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAARTAESAAMAAAABAAEAAIdpAAQAAAABAAAARgECAAQAAAABAAAAqgECAAwAAAABAAAAuAEPAAIAAAALAAAAwAEQAAMAAAABAAEAAIdpAAQAAAABAAARTAEZAAMAAAABAAAAAAHaAAUAAAABAAAAUAEdAAMAAAABAAIAAIedAAMAAAABAAIAAIedAAMAAAABAAAARgEAAAMAAAABAAAAgAECAAQAAAABAAAAtgECAAcAAAABAAAAtgHDAAIAAAALAAAAwAEaAAUAAAABAAAAyAEaAAUAAAABAAAA0AEaAAUAAAABAAAA2AEaAAUAAAABAAAA4AEaAAUAAAABAAAA6AEaAAUAAAABAAAA8AEaAAUAAAABAAA");
+            background-size: cover;
+            background-position: center;
         }
 
         * {
@@ -27,8 +35,8 @@
         }
 
         body {
-            background-color: var(--gemini-bg);
-            color: var(--gemini-text);
+            background-color: var(--jarvis-bg);
+            color: var(--jarvis-text);
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -51,6 +59,7 @@
             align-items: center;
             justify-content: space-between;
             background: transparent;
+            border-bottom: 1px solid var(--jarvis-border);
         }
 
         .brand {
@@ -59,34 +68,33 @@
             gap: 12px;
             font-size: 1.2rem;
             font-weight: 500;
-            color: var(--gemini-text);
+            color: var(--jarvis-text);
         }
 
         .brand-logo {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--gemini-border);
-            background: var(--gemini-surface);
+            border: 2px solid var(--jarvis-border);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
 
-        .brand-logo img {
+        .brand-logo-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
         }
 
         .model-pill {
             font-size: 0.8rem;
-            color: var(--gemini-text-secondary);
-            background: var(--gemini-surface);
+            color: var(--jarvis-text-secondary);
+            background: var(--jarvis-surface);
             padding: 6px 14px;
             border-radius: 20px;
-            border: 1px solid var(--gemini-border);
+            border: 1px solid var(--jarvis-border);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -106,7 +114,7 @@
             width: 6px;
         }
         .chat-scroll::-webkit-scrollbar-thumb {
-            background: var(--gemini-border);
+            background: var(--jarvis-border);
             border-radius: 10px;
         }
 
@@ -133,15 +141,15 @@
         }
 
         .avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 0.85rem;
             overflow: hidden;
+            border: 1px solid var(--jarvis-border);
         }
 
         .user .avatar {
@@ -150,29 +158,33 @@
         }
 
         .ai .avatar {
-            background: var(--gemini-surface);
-            color: #8ab4f8;
-            border: 1px solid var(--gemini-border);
+            background: var(--jarvis-surface);
         }
 
-        .ai .avatar img {
+        .ai-avatar-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
         }
 
         .message-content {
             padding: 4px 0;
             line-height: 1.6;
             font-size: 0.95rem;
-            color: var(--gemini-text);
+            color: var(--jarvis-text);
         }
 
         .user .message-content {
-            background: var(--gemini-user-bubble);
+            background: var(--jarvis-user-bubble);
             padding: 12px 18px;
             border-radius: 20px;
             border-bottom-right-radius: 4px;
+        }
+
+        .ai .message-content {
+            background: var(--jarvis-surface);
+            padding: 12px 18px;
+            border-radius: 20px;
+            border-top-left-radius: 4px;
         }
 
         .ai .message-content p { margin-bottom: 12px; }
@@ -182,14 +194,14 @@
             color: #fff;
             font-weight: 600;
         }
-        .ai .message-content ul {
+        .ai .message-content ul, .ai .message-content ol {
             margin-left: 20px;
             margin-bottom: 12px;
         }
 
         pre {
             background: #1a1a1c;
-            border: 1px solid var(--gemini-border);
+            border: 1px solid var(--jarvis-border);
             border-radius: 12px;
             margin: 12px 0;
             position: relative;
@@ -219,9 +231,9 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            background: var(--gemini-surface);
-            border: 1px solid var(--gemini-border);
-            color: var(--gemini-text-secondary);
+            background: var(--jarvis-surface);
+            border: 1px solid var(--jarvis-border);
+            color: var(--jarvis-text-secondary);
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -233,7 +245,7 @@
         }
 
         .copy-btn:hover {
-            background: var(--gemini-surface-hover);
+            background: var(--jarvis-surface-hover);
             color: white;
         }
 
@@ -242,8 +254,8 @@
             bottom: 24px;
             left: 24px;
             right: 24px;
-            background: var(--gemini-surface);
-            border: 1px solid var(--gemini-border);
+            background: var(--jarvis-surface);
+            border: 1px solid var(--jarvis-border);
             border-radius: 32px;
             padding: 10px 14px 10px 20px;
             display: flex;
@@ -253,7 +265,7 @@
         }
 
         .input-container:focus-within {
-            border-color: #8ab4f8;
+            border-color: #3b82f6;
         }
 
         input {
@@ -261,16 +273,16 @@
             background: transparent;
             border: none;
             outline: none;
-            color: var(--gemini-text);
+            color: var(--jarvis-text);
             font-size: 0.95rem;
         }
 
         input::placeholder {
-            color: var(--gemini-text-secondary);
+            color: var(--jarvis-text-secondary);
         }
 
         .send-button {
-            background: var(--gemini-gradient);
+            background: var(--jarvis-gradient);
             border: none;
             color: white;
             width: 36px;
@@ -297,7 +309,7 @@
         .dot {
             width: 7px;
             height: 7px;
-            background: #8ab4f8;
+            background: #3b82f6;
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
@@ -317,20 +329,19 @@
         <header>
             <div class="brand">
                 <div class="brand-logo">
-                    <!-- Usamos un icono de respaldo o un contenedor limpio para evitar fallos de carga -->
-                    <i data-lucide="bot" style="width: 20px; height: 20px; color: #8ab4f8;"></i>
+                    <div class="brand-logo-img"></div>
                 </div>
                 <span>Jarvis</span>
             </div>
             <div class="model-pill">
-                <i data-lucide="bot" style="width: 14px; height: 14px; color: #8ab4f8;"></i>
+                <i data-lucide="brain-circuit" style="width: 14px; height: 14px; color: #8ab4f8;"></i>
                 <span>gemini-3.8-flash</span>
             </div>
         </header>
 
         <div class="chat-scroll" id="chatScroll">
             <div class="message-row ai">
-                <div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>
+                <div class="avatar"><div class="ai-avatar-img"></div></div>
                 <div class="message-content">
                     ¡Hola! 🖐️ ¡Qué alegría saludarte! Soy <strong>Jarvis</strong>, tu asistente virtual para todo lo relacionado con el desarrollo web frontend. 🚀<br><br>Antes de empezar, ¿cómo te llamas para saber cómo dirigirme a ti? 😊
                 </div>
@@ -338,7 +349,7 @@
         </div>
 
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Escribe tu mensaje o tu nombre..." onkeydown="handleKey(event)">
+            <input type="text" id="userInput" placeholder="Escribe tu mensaje o tu nombre..." onkeydown="handleKey(event)" autocomplete="off">
             <button class="send-button" onclick="sendMsg()">
                 <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
             </button>
@@ -346,17 +357,27 @@
     </div>
 
     <script>
+        // Inicializar iconos de Lucide
         lucide.createIcons();
+
+        // Configurar opciones de marked para seguridad y saltos de línea
+        marked.setOptions({
+            breaks: true,
+            sanitize: false // Confiamos en el renderizado de marked
+        });
 
         async function sendMsg() {
             const input = document.getElementById('userInput');
             const txt = input.value.trim();
             if (!txt) return;
 
+            // Limpiar input inmediatamente
             input.value = '';
             
+            // Añadir mensaje del usuario
             appendMsg('user', txt);
 
+            // Mostrar indicador de carga
             const loadId = showLoading();
 
             try {
@@ -366,6 +387,8 @@
                     body: JSON.stringify({ mensaje: txt })
                 });
                 const data = await res.json();
+                
+                // Quitar indicador de carga
                 removeLoading(loadId);
 
                 if (res.ok) {
@@ -375,25 +398,32 @@
                 }
             } catch (e) {
                 removeLoading(loadId);
-                appendMsg('ai', '⚠️ **Error de red con Flask.**');
+                appendMsg('ai', '⚠️ **Error de red con el servidor.**');
             }
         }
 
+        // Manejar tecla Enter
         function handleKey(e) {
             if (e.key === 'Enter') {
                 sendMsg();
             }
         }
 
+        // Función para añadir mensajes al chat
         function appendMsg(sender, text) {
             const container = document.getElementById('chatScroll');
             const row = document.createElement('div');
             row.className = `message-row ${sender}`;
 
-            const avatarHTML = sender === 'user' 
-                ? `<div class="avatar"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>` 
-                : `<div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>`;
+            // HTML para el avatar
+            let avatarHTML = '';
+            if (sender === 'user') {
+                avatarHTML = `<div class="avatar"><i data-lucide="user" style="width: 18px; height: 18px;"></i></div>`;
+            } else {
+                avatarHTML = `<div class="avatar"><div class="ai-avatar-img"></div></div>`;
+            }
 
+            // HTML para el contenido, parseando Markdown para la IA
             const contentHTML = sender === 'ai' ? marked.parse(text) : escapeHtml(text);
 
             row.innerHTML = `
@@ -403,22 +433,25 @@
 
             container.appendChild(row);
 
+            // Añadir botones de copia a los bloques de código de la IA
             if (sender === 'ai') {
                 attachCopyButtons(row);
             }
 
+            // Re-renderizar iconos nuevos y hacer scroll al final
             lucide.createIcons();
             container.scrollTop = container.scrollHeight;
         }
 
+        // Mostrar puntos de carga de la IA
         function showLoading() {
             const container = document.getElementById('chatScroll');
             const id = 'load-' + Date.now();
             const row = document.createElement('div');
-            row.className = `message-row ai`;
+            row.className = 'message-row ai';
             row.id = id;
             row.innerHTML = `
-                <div class="avatar"><i data-lucide="bot" style="width: 16px; height: 16px;"></i></div>
+                <div class="avatar"><div class="ai-avatar-img"></div></div>
                 <div class="message-content">
                     <div class="typing-dots">
                         <div class="dot"></div>
@@ -433,15 +466,18 @@
             return id;
         }
 
+        // Quitar puntos de carga
         function removeLoading(id) {
             const el = document.getElementById(id);
             if (el) el.remove();
         }
 
+        // Escapar HTML para mensajes de usuario (seguridad)
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
+        // Función para añadir botones de "Copiar" a los bloques <pre>
         function attachCopyButtons(scope) {
             scope.querySelectorAll('pre').forEach(pre => {
                 const btn = document.createElement('button');
